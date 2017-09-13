@@ -1,0 +1,156 @@
+C51 COMPILER V6.23a  KEY                                                                   07/19/2017 10:52:45 PAGE 1   
+
+
+C51 COMPILER V6.23a, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN key.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE key.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include <reg51.h>
+   2          
+   3          sbit key_enb=P1^3;
+   4          sfr ldata=0x80;
+   5          sbit rs=P1^0;
+   6          sbit rw=P1^1;
+   7          sbit en=P1^2;
+   8          sbit busy=P0^7;
+   9          sbit buzzer=P1^5;
+  10          
+  11          void MSDelay(unsigned int value){
+  12   1      unsigned int i,j;
+  13   1      for(i=0;i<value;i++)
+  14   1      for(j=0;j<1275;j++);
+  15   1      }
+  16          void lcdready(){
+  17   1      
+  18   1      busy=1;
+  19   1      rs=0;
+  20   1      rw=1;
+  21   1      while(busy==1)
+  22   1      {
+  23   2      en=0;
+  24   2      MSDelay(1);
+  25   2      en=1;
+  26   2      }
+  27   1      return;
+  28   1      }
+  29          
+  30          void lcdcmd(unsigned char value){
+  31   1      lcdready();
+  32   1      ldata=value;
+  33   1      rs=0;
+  34   1      rw=0;
+  35   1      en=1;
+  36   1      MSDelay(1);
+  37   1      en=0;
+  38   1      return;
+  39   1      }
+  40          
+  41          void lcddata(unsigned char value){
+  42   1      lcdready();
+  43   1      ldata=value;
+  44   1      rs=1;
+  45   1      rw=0;
+  46   1      en=1;
+  47   1      MSDelay(1);
+  48   1      en=0;
+  49   1      return;
+  50   1      }
+  51          
+  52          void function(){
+  53   1      unsigned char y;
+  54   1      key_enb=1;
+  55   1      
+C51 COMPILER V6.23a  KEY                                                                   07/19/2017 10:52:45 PAGE 2   
+
+  56   1      
+  57   1      
+  58   1      
+  59   1      
+  60   1      
+  61   1      
+  62   1      m:
+  63   1      P0=0xFF;
+  64   1      MSDelay(1);
+  65   1      
+  66   1      key_enb=0;
+  67   1      MSDelay(1);
+  68   1      y=P0;
+  69   1      key_enb=1;
+  70   1      P0=0xFF;
+  71   1      if(y==0xFF)goto m;
+  72   1      else{
+  73   2      
+  74   2      buzzer=1;
+  75   2      MSDelay(20);
+  76   2      buzzer=0;
+  77   2      key_enb=0;
+  78   2      y=P0;
+  79   2      key_enb=1;
+  80   2      P0=0xFF;
+  81   2      if(y==0x7F){lcdcmd(0x80);lcdcmd(0x01);
+  82   3      lcddata('U');lcddata('P');
+  83   3      }
+  84   2      else if(y==0xBF){
+  85   3      lcdcmd(0x80);lcdcmd(0x01);
+  86   3      lcddata('D');lcddata('O');lcddata('W');lcddata('N');
+  87   3      
+  88   3      }
+  89   2      else if(y==0xDF){lcdcmd(0x80);lcdcmd(0x01);
+  90   3      lcddata('L');lcddata('I');lcddata('S');lcddata('T');
+  91   3      
+  92   3      }
+  93   2      else if(y==0xEF){lcdcmd(0x80);lcdcmd(0x01);
+  94   3      lcddata('E');lcddata('N');lcddata('T');lcddata('E');lcddata('R');
+  95   3      
+  96   3      }
+  97   2      else if(y==0xF7){lcdcmd(0x80);lcdcmd(0x01);
+  98   3      lcddata('S');lcddata('T');lcddata('A');lcddata('T');lcddata('U');lcddata('S');
+  99   3      
+ 100   3      }
+ 101   2      else if(y==0xFB){lcdcmd(0x80);lcdcmd(0x01);
+ 102   3      lcddata('M');lcddata('E');lcddata('N');lcddata('U');
+ 103   3      
+ 104   3      }
+ 105   2      else if(y==0xFD){lcdcmd(0x80);lcdcmd(0x01);
+ 106   3      lcddata('C');lcddata('A');lcddata('N');lcddata('C');lcddata('E');lcddata('L');
+ 107   3      
+ 108   3      }
+ 109   2      else if(y==0xFE){lcdcmd(0x80);lcdcmd(0x01);
+ 110   3      lcddata('A');lcddata('C');lcddata('K');
+ 111   3      
+ 112   3      }}goto m;
+ 113   1      
+ 114   1      
+ 115   1      
+ 116   1      }
+ 117          
+C51 COMPILER V6.23a  KEY                                                                   07/19/2017 10:52:45 PAGE 3   
+
+ 118          void main(){
+ 119   1      
+ 120   1      buzzer=0;
+ 121   1      lcdcmd(0x38);
+ 122   1      lcdcmd(0x08);
+ 123   1      lcdcmd(0x01);
+ 124   1      lcdcmd(0x06);
+ 125   1      lcdcmd(0x0C);
+ 126   1      function();
+ 127   1      }
+ 128          
+ 129          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    400    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,73 @@
+BL51 BANKED LINKER/LOCATER V4.23                                                        07/16/2017  20:12:40  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V4.23, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE Text2.obj, .\lcdprint.obj TO kunal01 RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  Text2.obj (TEXT2)
+  .\lcdprint.obj (LCDPRINT)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  kunal01 (TEXT2)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            IDATA   0008H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0096H     UNIT         ?PR?MAIN?LCDPRINT
+            CODE    0099H     003EH     UNIT         ?PR?LCD?LCDPRINT
+            CODE    00D7H     0038H     UNIT         ?PR?DELAY?LCDPRINT
+            CODE    010FH     0020H     UNIT         ?PR?DELAY?TEXT2
+            CODE    012FH     001BH     UNIT         ?PR?_LCDDATA?LCDPRINT
+            CODE    014AH     001AH     UNIT         ?PR?_COMMAND?LCDPRINT
+            CODE    0164H     0016H     UNIT         ?PR?MAIN?TEXT2
+            CODE    017AH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   kunal01 (TEXT2)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?TEXT2
+
+?PR?MAIN?TEXT2
+  +--> ?PR?DELAY?TEXT2
+
+
+
+IGNORED SYMBOLS:
+   DELAY
+   MAIN
+
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  MAIN
+    MODULE:  .\lcdprint.obj (LCDPRINT)
+
+BL51 BANKED LINKER/LOCATER V4.23                                                      07/16/2017  20:12:40  PAGE 2
+
+
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  DELAY
+    MODULE:  .\lcdprint.obj (LCDPRINT)
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MAIN?LCDPRINT
+
+Program Size: data=9.0 xdata=0 code=390
+LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  2 ERROR(S)

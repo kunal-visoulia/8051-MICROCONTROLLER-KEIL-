@@ -1,0 +1,298 @@
+C51 COMPILER V6.23a  LCD                                                                   07/20/2017 17:58:32 PAGE 1   
+
+
+C51 COMPILER V6.23a, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN LCD.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE LCD.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include<reg51.h>
+   2          
+   3          sfr ldata=0x80;
+   4          sbit rs=P1^0;
+   5          sbit rw=P1^1;
+   6          sbit en=P1^2;
+   7          sbit busy=P0^7;
+   8          sbit buzzer=P1^5;
+   9          sbit LED_FAULT = P1^6;
+  10          sbit LED_CPU=P1^7;
+  11          sbit key_enb=P1^3;
+  12          
+  13          void delay(){
+  14   1      unsigned int i;
+  15   1      for(i=0;i<8;i++){
+  16   2      TMOD=0x01;
+  17   2      TH0=0x00;
+  18   2      TL0=0x00;
+  19   2      TR0=1;
+  20   2      while(TF0==0);
+  21   2      TR0=0;
+  22   2      TF0=0;
+  23   2      }}
+  24          void lcdcmd(unsigned char);
+  25          void lcddata(unsigned char);
+  26          void MSDelay(unsigned int);
+  27          void lcdready();
+  28          void function(){
+  29   1       int  x=0;
+  30   1      unsigned char a,b;
+  31   1      unsigned char y;
+  32   1      key_enb=1;
+  33   1      
+  34   1      p:
+  35   1      if(x<0){
+  36   2      x=99;
+  37   2      b=x%10;
+  38   2      b=b+0x30;
+  39   2      a=x/10;
+  40   2      a=a+0x30;
+  41   2      lcddata(a);
+  42   2      lcdcmd(0x06);
+  43   2      lcddata(b);
+  44   2      }
+  45   1      if(x>99){
+  46   2      x=0;
+  47   2      a='0';
+  48   2      b=x+0x30;
+  49   2      lcddata(a);
+  50   2      lcdcmd(0x06);
+  51   2      lcddata(b);
+  52   2      }
+  53   1      if(x<10)
+  54   1      {a='0';
+  55   2      b=x+0x30;
+C51 COMPILER V6.23a  LCD                                                                   07/20/2017 17:58:32 PAGE 2   
+
+  56   2      lcddata(a);
+  57   2      lcdcmd(0x06);
+  58   2      lcddata(b);}
+  59   1      m:
+  60   1      
+  61   1      P0=0xFF;//make p0 input
+  62   1      MSDelay(1);
+  63   1      key_enb=0;//H-to-L for taking key value
+  64   1      MSDelay(1);
+  65   1      y=P0;//input value
+  66   1      key_enb=1;//high again
+  67   1      P0=0xFF;//ready for input again
+  68   1      if(y==0xFF)goto m;
+  69   1      else{
+  70   2      
+  71   2      MSDelay(10);//debounce of 20ms
+  72   2      
+  73   2      key_enb=0;
+  74   2      y=P0;
+  75   2      key_enb=1;
+  76   2      P0=0xFF;
+  77   2      if(y==0x7F){lcdcmd(0x80);lcdcmd(0x01);
+  78   3      x++;
+  79   3      if(x<10)
+  80   3      {a='0';
+  81   4      b=x+0x30;
+  82   4      lcddata(a);
+  83   4      lcdcmd(0x06);
+  84   4      lcddata(b);}
+  85   3      else if(x>99){
+  86   4      x=0;
+  87   4      a='0';
+  88   4      b=x+0x30;
+  89   4      lcddata(a);
+  90   4      lcdcmd(0x06);
+  91   4      lcddata(b);
+  92   4      }
+  93   3      else {
+  94   4      b=x%10;
+  95   4      b=b+0x30;
+  96   4      a=x/10;
+  97   4      a=a+0x30;
+  98   4      lcddata(a);
+  99   4      lcdcmd(0x06);
+ 100   4      lcddata(b);
+ 101   4      }
+ 102   3      }
+ 103   2      else if(y==0xBF){
+ 104   3      lcdcmd(0x80);lcdcmd(0x01);
+ 105   3      x--;
+ 106   3      if(x<0){
+ 107   4      x=99;
+ 108   4      a='9';
+ 109   4      b='9';
+ 110   4      lcddata(a);
+ 111   4      lcdcmd(0x06);
+ 112   4      lcddata(b);
+ 113   4      }
+ 114   3      
+ 115   3      else if(x<10)
+ 116   3      {a='0';
+ 117   4      b=x+0x30;
+C51 COMPILER V6.23a  LCD                                                                   07/20/2017 17:58:32 PAGE 3   
+
+ 118   4      lcddata(a);
+ 119   4      lcdcmd(0x06);
+ 120   4      lcddata(b);}
+ 121   3      
+ 122   3      else {
+ 123   4      b=x%10;
+ 124   4      b=b+0x30;
+ 125   4      a=x/10;
+ 126   4      a=a+0x30;
+ 127   4      lcddata(a);
+ 128   4      lcdcmd(0x06);
+ 129   4      lcddata(b);
+ 130   4      }
+ 131   3      }
+ 132   2      else if(y==0xDF){lcdcmd(0x80);lcdcmd(0x01);
+ 133   3      goto p;
+ 134   3      
+ 135   3      }
+ 136   2      else if(y==0xEF){lcdcmd(0x80);lcdcmd(0x01);
+ 137   3      goto p;
+ 138   3      
+ 139   3      }
+ 140   2      else if(y==0xF7){lcdcmd(0x80);lcdcmd(0x01);
+ 141   3      goto p;
+ 142   3      
+ 143   3      }
+ 144   2      else if(y==0xFB){lcdcmd(0x80);lcdcmd(0x01);
+ 145   3      goto p;
+ 146   3      
+ 147   3      }
+ 148   2      else if(y==0xFD){lcdcmd(0x80);lcdcmd(0x01);
+ 149   3      goto p;
+ 150   3      
+ 151   3      }
+ 152   2      else if(y==0xFE){lcdcmd(0x80);lcdcmd(0x01);
+ 153   3      
+ 154   3      buzzer=1;
+ 155   3      MSDelay(20);
+ 156   3      buzzer=0;
+ 157   3      x=0;
+ 158   3      a='0';
+ 159   3      b='0';
+ 160   3      lcddata(a);
+ 161   3      lcdcmd(0x06);
+ 162   3      lcddata(b);
+ 163   3      goto m;
+ 164   3      }}
+ 165   1      goto m;
+ 166   1      
+ 167   1      }
+ 168          void main(){
+ 169   1      
+ 170   1      buzzer=0;
+ 171   1      lcdcmd(0x38);
+ 172   1      lcdcmd(0x0C);
+ 173   1      lcdcmd(0x01);
+ 174   1      lcdcmd(0x06);
+ 175   1      lcdcmd(0x80);
+ 176   1      
+ 177   1      LED_FAULT=1;
+ 178   1      LED_CPU=0;
+ 179   1      lcddata('K');MSDelay(20);lcdcmd(0x18);
+C51 COMPILER V6.23a  LCD                                                                   07/20/2017 17:58:32 PAGE 4   
+
+ 180   1      lcddata('U');MSDelay(20);lcdcmd(0x18);
+ 181   1      lcddata('N');MSDelay(20);lcdcmd(0x18);
+ 182   1      lcddata('A');MSDelay(20);lcdcmd(0x18);
+ 183   1      lcddata('L');MSDelay(20);lcdcmd(0x18);
+ 184   1      lcddata(' ');MSDelay(20);lcdcmd(0x18);
+ 185   1      lcddata('V');MSDelay(20);lcdcmd(0x18);
+ 186   1      lcddata('I');MSDelay(20);lcdcmd(0x18);lcddata('S');MSDelay(20);lcdcmd(0x18);
+ 187   1      lcddata('O');MSDelay(20);lcdcmd(0x18);lcddata('U');MSDelay(20);lcdcmd(0x18);
+ 188   1      lcddata('L');MSDelay(20);lcdcmd(0x18);lcddata('I');MSDelay(20);lcdcmd(0x18);lcddata('A');MSDelay(20);lcdcm
+             -d(0x18);
+ 189   1      lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lc
+             -dcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);
+ 190   1      MSDelay(20);
+ 191   1      lcdcmd(0xC0);
+ 192   1      lcddata('M');MSDelay(20);lcdcmd(0x18);
+ 193   1      lcddata('Y');MSDelay(20);lcdcmd(0x18);lcddata(' ');
+ 194   1      MSDelay(20);lcdcmd(0x18);lcddata('F');MSDelay(20);lcdcmd(0x18);lcddata('I');MSDelay(20);lcdcmd(0x18);lcdda
+             -ta('R');MSDelay(20);lcdcmd(0x18);lcddata('S');MSDelay(20);lcdcmd(0x18);lcddata('T');MSDelay(20);lcdcmd(0x18);lcddata(' '
+             -);MSDelay(20);lcdcmd(0x18);lcddata('L');MSDelay(20);lcdcmd(0x18);lcddata('C');MSDelay(20);lcdcmd(0x18);lcddata('D');MSDe
+             -lay(20);lcdcmd(0x18);lcddata(' ');MSDelay(20);lcdcmd(0x18);
+ 195   1      lcddata('P');MSDelay(20);lcdcmd(0x18);lcddata('R');MSDelay(20);lcdcmd(0x18);lcddata('O');MSDelay(20);lcdcm
+             -d(0x18);
+ 196   1      lcddata('G');MSDelay(20);lcdcmd(0x18);lcddata('R');
+ 197   1      MSDelay(20);lcdcmd(0x18);lcddata('A');MSDelay(20);lcdcmd(0x18);lcddata('M');MSDelay(20);lcdcmd(0x18);
+ 198   1      lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lc
+             -dcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);lcdcm
+             -d(0x1C);lcdcmd(0x1C);lcdcmd(0x1C);
+ 199   1      
+ 200   1      
+ 201   1      while(1){unsigned int i;
+ 202   2      for(i-0;i<10;i++){
+ 203   3      LED_FAULT=~LED_FAULT;
+ 204   3      LED_CPU=~LED_CPU;
+ 205   3      delay();
+ 206   3      LED_FAULT=~LED_FAULT;
+ 207   3      LED_CPU=~LED_CPU;
+ 208   3      delay();}
+ 209   2      buzzer=0;
+ 210   2      lcdcmd(0x38);
+ 211   2      lcdcmd(0x08);
+ 212   2      lcdcmd(0x01);
+ 213   2      lcdcmd(0x06);
+ 214   2      lcdcmd(0x0C);
+ 215   2      function();
+ 216   2      }
+ 217   1      
+ 218   1      
+ 219   1      }
+ 220          
+ 221          void lcdcmd(unsigned char value){
+ 222   1      lcdready();
+ 223   1      ldata=value;
+ 224   1      rs=0;
+ 225   1      rw=0;
+ 226   1      en=1;
+ 227   1      MSDelay(1);
+ 228   1      en=0;
+ 229   1      return;
+ 230   1      }
+ 231          
+ 232          void lcddata(unsigned char value){
+ 233   1      lcdready();
+C51 COMPILER V6.23a  LCD                                                                   07/20/2017 17:58:32 PAGE 5   
+
+ 234   1      ldata=value;
+ 235   1      rs=1;
+ 236   1      rw=0;
+ 237   1      en=1;
+ 238   1      MSDelay(1);
+ 239   1      en=0;
+ 240   1      return;
+ 241   1      }
+ 242          void lcdready(){
+ 243   1      
+ 244   1      busy=1;
+ 245   1      rs=0;
+ 246   1      rw=1;
+ 247   1      while(busy==1)
+ 248   1      {
+ 249   2      en=0;
+ 250   2      MSDelay(1);
+ 251   2      en=1;
+ 252   2      }
+ 253   1      return;
+ 254   1      }
+ 255          void MSDelay(unsigned int value){
+ 256   1      unsigned int i,j;
+ 257   1      for(i=0;i<value;i++)
+ 258   1      for(j=0;j<1275;j++);
+ 259   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1387    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

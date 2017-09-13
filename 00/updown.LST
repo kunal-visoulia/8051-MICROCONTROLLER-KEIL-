@@ -1,0 +1,232 @@
+C51 COMPILER V6.23a  UPDOWN                                                                07/20/2017 13:13:46 PAGE 1   
+
+
+C51 COMPILER V6.23a, COMPILATION OF MODULE UPDOWN
+OBJECT MODULE PLACED IN updown.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE updown.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include<reg51.h>
+   2          
+   3          sbit key_enb=P1^3;
+   4          sfr ldata=0x80;
+   5          sbit rs=P1^0;
+   6          sbit rw=P1^1;
+   7          sbit en=P1^2;
+   8          sbit busy=P0^7;
+   9          sbit buzzer=P1^5;
+  10          
+  11          void MSDelay(unsigned int value){
+  12   1      unsigned int i,j;
+  13   1      for(i=0;i<value;i++)
+  14   1      for(j=0;j<1275;j++);
+  15   1      }
+  16          void lcdready(){
+  17   1      
+  18   1      busy=1;
+  19   1      rs=0;
+  20   1      rw=1;
+  21   1      while(busy==1)
+  22   1      {
+  23   2      en=0;
+  24   2      MSDelay(1);
+  25   2      en=1;
+  26   2      }
+  27   1      return;
+  28   1      }
+  29          
+  30          void lcdcmd(unsigned char value){
+  31   1      lcdready();
+  32   1      ldata=value;
+  33   1      rs=0;
+  34   1      rw=0;
+  35   1      en=1;
+  36   1      MSDelay(1);
+  37   1      en=0;
+  38   1      return;
+  39   1      }
+  40          
+  41          void lcddata(unsigned char value){
+  42   1      lcdready();
+  43   1      ldata=value;
+  44   1      rs=1;
+  45   1      rw=0;
+  46   1      en=1;
+  47   1      MSDelay(1);
+  48   1      en=0;
+  49   1      return;
+  50   1      }
+  51          
+  52          void function(){
+  53   1       int  x=0;
+  54   1      unsigned char a,b;
+  55   1      unsigned char y;
+C51 COMPILER V6.23a  UPDOWN                                                                07/20/2017 13:13:46 PAGE 2   
+
+  56   1      key_enb=1;
+  57   1      
+  58   1      p:
+  59   1      if(x<0){
+  60   2      x=99;
+  61   2      b=x%10;
+  62   2      b=b+0x30;
+  63   2      a=x/10;
+  64   2      a=a+0x30;
+  65   2      lcddata(a);
+  66   2      lcdcmd(0x06);
+  67   2      lcddata(b);
+  68   2      }
+  69   1      if(x>99){
+  70   2      x=0;
+  71   2      a='0';
+  72   2      b=x+0x30;
+  73   2      lcddata(a);
+  74   2      lcdcmd(0x06);
+  75   2      lcddata(b);
+  76   2      }
+  77   1      if(x<10)
+  78   1      {a='0';
+  79   2      b=x+0x30;
+  80   2      lcddata(a);
+  81   2      lcdcmd(0x06);
+  82   2      lcddata(b);}
+  83   1      m:
+  84   1      
+  85   1      P0=0xFF;//make p0 input
+  86   1      MSDelay(1);
+  87   1      key_enb=0;//H-to-L for taking key value
+  88   1      MSDelay(1);
+  89   1      y=P0;//input value
+  90   1      key_enb=1;//high again
+  91   1      P0=0xFF;//ready for input again
+  92   1      if(y==0xFF)goto m;
+  93   1      else{
+  94   2      
+  95   2      MSDelay(10);//debounce of 20ms
+  96   2      
+  97   2      key_enb=0;
+  98   2      y=P0;
+  99   2      key_enb=1;
+ 100   2      P0=0xFF;
+ 101   2      if(y==0x7F){lcdcmd(0x80);lcdcmd(0x01);
+ 102   3      x++;
+ 103   3      if(x<10)
+ 104   3      {a='0';
+ 105   4      b=x+0x30;
+ 106   4      lcddata(a);
+ 107   4      lcdcmd(0x06);
+ 108   4      lcddata(b);}
+ 109   3      else if(x>99){
+ 110   4      x=0;
+ 111   4      a='0';
+ 112   4      b=x+0x30;
+ 113   4      lcddata(a);
+ 114   4      lcdcmd(0x06);
+ 115   4      lcddata(b);
+ 116   4      }
+ 117   3      else {
+C51 COMPILER V6.23a  UPDOWN                                                                07/20/2017 13:13:46 PAGE 3   
+
+ 118   4      b=x%10;
+ 119   4      b=b+0x30;
+ 120   4      a=x/10;
+ 121   4      a=a+0x30;
+ 122   4      lcddata(a);
+ 123   4      lcdcmd(0x06);
+ 124   4      lcddata(b);
+ 125   4      }
+ 126   3      }
+ 127   2      else if(y==0xBF){
+ 128   3      lcdcmd(0x80);lcdcmd(0x01);
+ 129   3      x--;
+ 130   3      if(x<0){
+ 131   4      x=99;
+ 132   4      a='9';
+ 133   4      b='9';
+ 134   4      lcddata(a);
+ 135   4      lcdcmd(0x06);
+ 136   4      lcddata(b);
+ 137   4      }
+ 138   3      
+ 139   3      else if(x<10)
+ 140   3      {a='0';
+ 141   4      b=x+0x30;
+ 142   4      lcddata(a);
+ 143   4      lcdcmd(0x06);
+ 144   4      lcddata(b);}
+ 145   3      
+ 146   3      else {
+ 147   4      b=x%10;
+ 148   4      b=b+0x30;
+ 149   4      a=x/10;
+ 150   4      a=a+0x30;
+ 151   4      lcddata(a);
+ 152   4      lcdcmd(0x06);
+ 153   4      lcddata(b);
+ 154   4      }
+ 155   3      }
+ 156   2      else if(y==0xDF){lcdcmd(0x80);lcdcmd(0x01);
+ 157   3      goto p;
+ 158   3      
+ 159   3      }
+ 160   2      else if(y==0xEF){lcdcmd(0x80);lcdcmd(0x01);
+ 161   3      goto p;
+ 162   3      
+ 163   3      }
+ 164   2      else if(y==0xF7){lcdcmd(0x80);lcdcmd(0x01);
+ 165   3      goto p;
+ 166   3      
+ 167   3      }
+ 168   2      else if(y==0xFB){lcdcmd(0x80);lcdcmd(0x01);
+ 169   3      goto p;
+ 170   3      
+ 171   3      }
+ 172   2      else if(y==0xFD){lcdcmd(0x80);lcdcmd(0x01);
+ 173   3      goto p;
+ 174   3      
+ 175   3      }
+ 176   2      else if(y==0xFE){lcdcmd(0x80);lcdcmd(0x01);
+ 177   3      
+ 178   3      buzzer=1;
+ 179   3      MSDelay(20);
+C51 COMPILER V6.23a  UPDOWN                                                                07/20/2017 13:13:46 PAGE 4   
+
+ 180   3      buzzer=0;
+ 181   3      x=0;
+ 182   3      a='0';
+ 183   3      b='0';
+ 184   3      lcddata(a);
+ 185   3      lcdcmd(0x06);
+ 186   3      lcddata(b);
+ 187   3      goto m;
+ 188   3      }}
+ 189   1      goto m;
+ 190   1      }
+ 191          
+ 192          void main(){
+ 193   1      
+ 194   1      buzzer=0;
+ 195   1      lcdcmd(0x38);
+ 196   1      lcdcmd(0x08);
+ 197   1      lcdcmd(0x01);
+ 198   1      lcdcmd(0x06);
+ 199   1      lcdcmd(0x0C);
+ 200   1      function();
+ 201   1      }
+ 202          
+ 203          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    587    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

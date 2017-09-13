@@ -1,0 +1,58 @@
+C51 COMPILER V6.23a  LEDIE                                                                 07/20/2017 12:51:21 PAGE 1   
+
+
+C51 COMPILER V6.23a, COMPILATION OF MODULE LEDIE
+OBJECT MODULE PLACED IN LEDIE.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE LEDIE.C BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include<reg51.h>
+   2          
+   3          
+   4          sbit LED_FAULT = P1^6;
+   5          sbit LED_CPU=P1^7;
+   6          sbit buzzer=P1^5;
+   7          
+   8          void timer0() interrupt 1{
+   9   1      LED_FAULT=~LED_FAULT;
+  10   1      LED_CPU=~LED_CPU;
+  11   1      }
+  12          void main(){
+  13   1      unsigned int i;
+  14   1      buzzer=0;
+  15   1      LED_FAULT=1;
+  16   1      LED_CPU=0;
+  17   1      while(1){
+  18   2      TMOD=0x01;
+  19   2      for(i=0;i<15;i++)
+  20   2      {TMOD=0x01;
+  21   3      
+  22   3      TH0=0x00;
+  23   3      TL0=0x00;
+  24   3      TR0=1;
+  25   3      while(TF0==0);
+  26   3      TF0=0;
+  27   3      TR0=0;
+  28   3      }
+  29   2      TMOD=0x01;
+  30   2      TH0=0x00;
+  31   2      TL0=0x00;
+  32   2      TR0=1;
+  33   2      IE=0x82;
+  34   2      }
+  35   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     60    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
